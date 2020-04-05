@@ -7,6 +7,9 @@ import Date exposing (Date)
 import Time exposing (Month(..))
 import Json.Decode as D
 import Json.Encode as E
+import List
+import Array
+import String
 
 
 -- Types
@@ -27,12 +30,30 @@ type alias CountriesData =
 
 -- JSON Decoders
 
+stringToDate : String -> Date
+stringToDate s = 
+    let
+        t = 
+            String.split "-" s 
+                |> List.map (Maybe.withDefault 0 << String.toInt)
+                |> Array.fromList
+        year = 
+            Array.get 0 t 
+                |> Maybe.withDefault 2020
+        month = 
+            Array.get 1 t 
+                |> Maybe.withDefault 1
+                |> Date.numberToMonth 
+        day = 
+            Array.get 2 t 
+                |> Maybe.withDefault 1
+    in
+    Date.fromCalendarDate year month day
+
 dateDecoder : D.Decoder Date
 dateDecoder =
     D.map 
-        (Maybe.withDefault (Date.fromCalendarDate 2020 Jan 1) 
-            << Result.toMaybe 
-            << Date.fromIsoString) 
+        stringToDate
         D.string
 
 entryDecoder : D.Decoder DataEntry
