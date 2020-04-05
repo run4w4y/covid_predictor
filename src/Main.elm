@@ -1,10 +1,15 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, text, pre)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 import CovidData exposing (..)
 import Json.Encode as E
 import Http
+import Dict
+import List
+import Platform.Cmd as C
 
 
 -- Main
@@ -23,7 +28,7 @@ main =
 type Model 
     = Failure
     | Loading
-    | Success String
+    | Success CountriesData String
 
 init : () -> (Model, Cmd Msg)
 init _ = 
@@ -35,24 +40,34 @@ loadData : Cmd Msg
 loadData =
     Http.get 
         { url = "https://pomber.github.io/covid19/timeseries.json"
-        , expect = Http.expectJson GotData dataDecoder
+        , expect = Http.expectJson identity dataDecoder
         }
+        |> C.map (\x -> Msg x "Russia")
 
 
 -- Update
 
-type Msg
-    = GotData (Result Http.Error CountriesData)
+type alias Msg = 
+    { data    : Result Http.Error CountriesData
+    , country : String
+    }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case msg of
-        GotData result -> 
-            case result of 
-                Ok data -> 
-                    (Success <| E.encode 4 <| dataEncode data, Cmd.none)
-                Err _ ->
-                    (Failure, Cmd.none)
+    case msg.data of 
+        Ok data -> 
+            case Dict.get msg.country data of
+                Just entry ->
+                    ( entry
+                        |> E.list entryEncode
+                        |> E.encode 4
+                        |> Success data 
+                    , Cmd.none
+                    )
+                Nothing ->
+                    (Failure, Cmd.none) -- make several kinds of failures
+        Err _ ->
+            (Failure, Cmd.none)
 
 
 -- Subscriptions
@@ -71,5 +86,9 @@ view model =
             pre [] [ text "something went wrong" ]
         Loading ->
             pre [] [ text "loading" ]
-        Success result ->
-            pre [] [ text result ]
+        Success data result ->
+            div [] 
+            [ select [ onInput (\x -> Msg (Ok data) x) ]  
+                (Dict.keys data |> List.map (\x -> option [ value x ] [ text x ]))
+            , pre [] [ text result ]
+            ]
