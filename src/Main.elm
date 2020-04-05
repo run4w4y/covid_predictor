@@ -5,6 +5,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import CovidData exposing (..)
+import CovidData.Encode exposing (..)
+import CovidData.Decode exposing (..)
 import Json.Encode as E
 import Http
 import Dict
