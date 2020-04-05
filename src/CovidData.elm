@@ -18,5 +18,3 @@ type alias DataEntry =
 
 type alias CountriesData = 
     Dict Country (List DataEntry)
-
-
