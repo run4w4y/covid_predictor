@@ -1,11 +1,10 @@
-module CovidData exposing (DataEntry, getData, totalData, getCountryData)
+module CovidData exposing (CountriesData, DataEntry, dataDecoder, dataEncode)
 
 import Dict exposing (Dict, values)
 import Maybe
 import Result
-import Http
-import Date
-import Time exposing (Month)
+import Date exposing (Date)
+import Time exposing (Month(..))
 import Json.Decode as D
 import Json.Encode as E
 
@@ -16,7 +15,7 @@ type alias Country =
     String
 
 type alias DataEntry =
-    { day       : Maybe Date
+    { day       : Date
     , confirmed : Int
     , deaths    : Int
     , recovered : Int
@@ -34,7 +33,7 @@ dateDecoder =
         (Maybe.withDefault (Date.fromCalendarDate 2020 Jan 1) 
             << Result.toMaybe 
             << Date.fromIsoString) 
-        string
+        D.string
 
 entryDecoder : D.Decoder DataEntry
 entryDecoder =
@@ -53,7 +52,7 @@ dataDecoder =
 
 dateEncode : Date -> E.Value
 dateEncode = -- point free function, not sure if works
-    E.string <| Date.toIsoString
+    E.string << Date.toIsoString
 
 entryEncode : DataEntry -> E.Value
 entryEncode entry =
@@ -67,13 +66,3 @@ entryEncode entry =
 dataEncode : CountriesData -> E.Value
 dataEncode = -- point free again
     E.dict identity entryEncode
-
-
--- HTTP request for JSON data
-
-getData : Cmd (Result Http.Error CountriesData)
-getData = 
-    Http.get 
-        { url = "https://pomber.github.io/covid19/timeseries.json"
-        , expect = Http.expectJson identity dataDecoder
-        }
