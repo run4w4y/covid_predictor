@@ -26,7 +26,8 @@ main =
 -- Model
 
 type Model 
-    = Failure
+    = HttpFailure
+    | CountryNotFound CountriesData
     | Loading
     | Success CountriesData String
 
@@ -42,7 +43,7 @@ loadData =
         { url = "https://pomber.github.io/covid19/timeseries.json"
         , expect = Http.expectJson identity dataDecoder
         }
-        |> C.map (\x -> Msg x "Russia")
+        |> C.map (\x -> Msg x "Afghanistan")
 
 
 -- Update
@@ -65,9 +66,9 @@ update msg model =
                     , Cmd.none
                     )
                 Nothing ->
-                    (Failure, Cmd.none) -- make several kinds of failures
+                    (CountryNotFound data, Cmd.none)
         Err _ ->
-            (Failure, Cmd.none)
+            (HttpFailure, Cmd.none)
 
 
 -- Subscriptions
@@ -82,13 +83,19 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     case model of
-        Failure ->
-            pre [] [ text "something went wrong" ]
+        HttpFailure ->
+            pre [] [ text "something went wrong with fetching data over http" ]
         Loading ->
             pre [] [ text "loading" ]
+        CountryNotFound data ->
+            defaultLayout data "country could not be found"
         Success data result ->
-            div [] 
-            [ select [ onInput (\x -> Msg (Ok data) x) ]  
-                (Dict.keys data |> List.map (\x -> option [ value x ] [ text x ]))
-            , pre [] [ text result ]
-            ]
+            defaultLayout data result
+
+defaultLayout : CountriesData -> String -> Html Msg
+defaultLayout data t = 
+    div [] 
+        [ select [ onInput (\x -> Msg (Ok data) x) ]  
+            (Dict.keys data |> List.map (\x -> option [ value x ] [ text x ]))
+        , pre [] [ text t ]
+        ]
