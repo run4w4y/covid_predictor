@@ -9,6 +9,8 @@ import Json.Encode as E
 import Http
 import Dict
 import List
+import String
+import Array
 import Platform.Cmd as C
 
 
@@ -95,7 +97,27 @@ view model =
 defaultLayout : CountriesData -> String -> Html Msg
 defaultLayout data t = 
     div [] 
-        [ select [ onInput (\x -> Msg (Ok data) x) ]  
+        [ pre [] [ text <| "Total confirmed: " ++ (String.fromInt <| total .confirmed data) ] 
+        , pre [] [ text <| "Total deaths: " ++  (String.fromInt <| total .deaths data) ]
+        , pre [] [ text <| "Total recovered: " ++ (String.fromInt <| total .recovered data) ]
+        , select [ onInput (\x -> Msg (Ok data) x) ]  
             (Dict.keys data |> List.map (\x -> option [ value x ] [ text x ]))
         , pre [] [ text t ]
         ]
+
+total : (DataEntry -> Int) -> CountriesData -> Int
+total f data = 
+    Dict.values data
+        |> List.map (totalCountry f)
+        |> List.sum 
+
+totalCountry : (DataEntry -> Int) -> List DataEntry -> Int
+totalCountry f data =
+    let 
+        data_ = Array.fromList data
+    in
+    case Array.get (Array.length data_ - 1) data_ of
+        Just entry ->
+            f entry
+        Nothing ->
+            0
