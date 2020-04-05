@@ -1,4 +1,4 @@
-module CovidData exposing (CountriesData, DataEntry, dataDecoder, dataEncode)
+module CovidData exposing (CountriesData, DataEntry, dataDecoder, dataEncode, entryEncode)
 
 import Dict exposing (Dict, values)
 import Maybe
