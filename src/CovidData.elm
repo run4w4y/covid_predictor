@@ -15,14 +15,14 @@ type alias Country =
     String
 
 type alias DataEntry =
-    { day       : Date
+    { date      : Date
     , confirmed : Int
     , deaths    : Int
     , recovered : Int
     }
 
 type alias CountriesData = 
-    Dict Country DataEntry
+    Dict Country (List DataEntry)
 
 
 -- JSON Decoders
@@ -45,7 +45,7 @@ entryDecoder =
 
 dataDecoder : D.Decoder CountriesData
 dataDecoder = 
-    D.dict entryDecoder
+    D.dict <| D.list entryDecoder
 
 
 -- JSON Encode functions
@@ -57,7 +57,7 @@ dateEncode = -- point free function, not sure if works
 entryEncode : DataEntry -> E.Value
 entryEncode entry =
     E.object 
-        [ ("date", dateEncode entry.day)
+        [ ("date", dateEncode entry.date)
         , ("confirmed", E.int entry.confirmed)
         , ("deaths", E.int entry.deaths)
         , ("recovered", E.int entry.recovered)
@@ -65,4 +65,4 @@ entryEncode entry =
 
 dataEncode : CountriesData -> E.Value
 dataEncode = -- point free again
-    E.dict identity entryEncode
+    E.dict identity <| E.list entryEncode
