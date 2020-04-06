@@ -20,8 +20,8 @@ type alias DefaultParams =
 
 view : DefaultParams -> Element Msg
 view params = 
-    el [] <| column [] 
-        [ column [ mainContent ]
+    el [ width fill ] <| row [ width fill ] 
+        [ column [ mainContent, width <| fillPortion 5 ]
             [ paragraph [] [ text <| "Country: " ++ params.country ]
             , paragraph [] 
                 [ total_ .confirmed (Dict.get params.country params.data)
@@ -41,9 +41,9 @@ view params =
                     |> (++) "Recovered: "
                     |> text
                 ]
-            , html params.leftSide
+            , el [ width <| maximum 900 fill ] <| html params.leftSide
             ]
-        , column [ navigation ]
+        , column [ navigation, width <| fillPortion 2, height fill ]
             [ html <| Html.select [ Html.Events.onInput (\x -> Msg (Ok params.data) x) ]  
                 (Dict.keys params.data |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
             , paragraph [] [ text "Total Statisctics" ]

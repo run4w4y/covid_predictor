@@ -25,7 +25,6 @@ type alias ChartParams =
     , dateTo    : Date
     , valuesMin : Int
     , valuesMax : Int
-    , svgWidth  : Float
     }
 
 
@@ -78,7 +77,7 @@ drawLineChart params =
             List.map transformToAreaData data
                 |> Shape.area Shape.monotoneInXCurve
     in
-    svg [ viewBox 0 0 params.w params.h, width params.svgWidth ]
+    svg [ viewBox 0 0 params.w params.h ]
         [ g [ transform [ Translate (params.padding - 1) (params.h - params.padding) ] ]
             [ xAxis ]
         , g [ transform [ Translate (params.padding - 1) params.padding ] ]

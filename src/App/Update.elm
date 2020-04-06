@@ -58,7 +58,6 @@ countrySvg data country =
                 , dateTo    = maxDate
                 , valuesMin = minValue
                 , valuesMax = maxValue
-                , svgWidth  = 900
                 } 
 
         Nothing ->
