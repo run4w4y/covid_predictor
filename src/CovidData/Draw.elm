@@ -50,11 +50,11 @@ drawLineChart params =
 
         xAxis : Svg msg
         xAxis =
-            Axis.bottom [ Axis.tickCount <| List.length params.data ] xScale
+            Axis.bottom [ Axis.tickCount <| 10 ] xScale
 
         yAxis : Svg msg
         yAxis =
-            Axis.left [ Axis.tickCount params.valuesMax ] yScale
+            Axis.left [ Axis.tickCount <| 10 ] yScale
 
         transformToLineData : ( Date, Float ) -> Maybe ( Float, Float )
         transformToLineData ( x, y ) = 
