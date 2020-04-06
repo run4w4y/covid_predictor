@@ -4,11 +4,15 @@ import App.Msg exposing (Msg)
 import CovidData exposing (..)
 import Element exposing (..)
 import Element.Region exposing (..)
+import Element.Background as Bg
+import Element.Font as Font
+import Element.Border as Border
 import Html exposing (Html)
 import Html.Events
 import Html.Attributes
 import Dict
 import Array
+import App.View.Fonts exposing (..)
 
 
 type alias DefaultParams =
@@ -20,9 +24,32 @@ type alias DefaultParams =
 
 view : DefaultParams -> Element Msg
 view params = 
-    el [ width fill, height fill ] <| row [ width fill ] 
-        [ column [ mainContent, width <| fillPortion 5, padding 30 ]
-            [ paragraph [] [ text <| "Country: " ++ params.country ]
+    el [ width fill, height fill ] <| row [ width fill, height fill ] 
+        [ column 
+            [ mainContent
+            , width <| fillPortion 5
+            , padding 30
+            , Bg.color <| rgb255 224 224 224 
+            , height fill
+            ]
+            [ el [ paddingEach { edges | bottom = 15 } ] <| paragraph 
+                [ Font.family
+                    [ openSans
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 25
+                , Border.solid
+                , Border.widthEach { edges | bottom = 2 }
+                , Border.color <| rgb255 30 30 30
+                , width shrink
+                , padding 5
+                ] 
+                [ el 
+                    [ Font.color <| rgb255 30 30 30 ] <| text "Country: "
+                , el 
+                    [ Font.color <| rgb255 70 70 70 ] <| text params.country 
+                ]
             , paragraph [] 
                 [ total_ .confirmed (Dict.get params.country params.data)
                     |> formatNumber
@@ -43,9 +70,16 @@ view params =
                 ]
             , el [ width <| maximum 900 fill ] <| html params.leftSide
             ]
-        , column [ navigation, width <| fillPortion 2, height fill, padding 30 ]
+        , column 
+            [ navigation
+            , width <| fillPortion 2
+            , height fill
+            , padding 30 
+            , Bg.color <| rgb255 242 242 242
+            ]
             [ html <| Html.select [ Html.Events.onInput (\x -> Msg (Ok params.data) x) ]  
-                (Dict.keys params.data |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
+                (Dict.keys params.data 
+                    |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
             , paragraph [] [ text "Total Statisctics" ]
             , paragraph [] 
                 [ total .confirmed params.data 
@@ -68,6 +102,13 @@ view params =
             ] 
         ]
 
+edges = 
+    { top = 0
+    , right = 0
+    , bottom = 0
+    , left = 0
+    }
+
 formatNumber : Int -> String
 formatNumber n =
     let 
@@ -83,11 +124,15 @@ formatNumber n =
         |> breakString []
         |> String.join " "
 
+-- Total like total
+
 total : (DataEntry -> Int) -> CountriesData -> Int
 total f data = 
     Dict.values data
         |> List.map (total_ f << Just)
         |> List.sum 
+
+-- Total for countries
 
 total_ : (DataEntry -> Int) -> Maybe (List DataEntry) -> Int
 total_ f entries =
