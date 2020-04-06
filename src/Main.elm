@@ -89,7 +89,7 @@ update msg model =
                                 |> Maybe.withDefault 10
                     in
                     ( Success data 
-                        <| defaultLayout data <| drawLineChart 
+                        <| drawLineChart 
                             { data      = List.map (\x -> (x.date, toFloat x.confirmed)) entries
                             , w         = 900
                             , h         = 450
