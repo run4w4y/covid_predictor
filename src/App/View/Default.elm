@@ -51,22 +51,28 @@ view params =
                     [ Font.color <| rgb255 70 70 70 ] <| text params.country 
                 ]
             , paragraph [] 
-                [ total_ .confirmed (Dict.get params.country params.data)
+                [ el 
+                    [ Font.color <| rgb255 183 28 28 ] <| text "Confirmed: "
+                , total_ .confirmed (Dict.get params.country params.data)
                     |> formatNumber
-                    |> (++) "Confirmed: "
-                    |> text
-                ]
-            , paragraph [] 
-                [ total_ .deaths (Dict.get params.country params.data)
-                    |> formatNumber
-                    |> (++) "Deaths: "
-                    |> text
+                    |> text 
+                    |> el [ Font.color <| rgb255 198 40 40 ]
                 ]
             , paragraph []
-                [ total_ .recovered (Dict.get params.country params.data)
+                [ el
+                    [ Font.color <| rgb255 13 71 161 ] <| text "Recovered: "
+                , total_ .recovered (Dict.get params.country params.data)
                     |> formatNumber
-                    |> (++) "Recovered: "
                     |> text
+                    |> el [ Font.color <| rgb255 21 101 192 ]
+                ]
+            , paragraph [] 
+                [ el
+                    [ Font.color <| rgb255 38 50 56 ] <| text "Deaths: "
+                , total_ .deaths (Dict.get params.country params.data)
+                    |> formatNumber
+                    |> text
+                    |> el [ Font.color <| rgb255 66 66 66 ]
                 ]
             , el [ width <| maximum 900 fill ] <| html params.leftSide
             ]
