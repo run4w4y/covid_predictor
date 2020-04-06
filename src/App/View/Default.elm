@@ -20,53 +20,68 @@ type alias DefaultParams =
 
 view : DefaultParams -> Element Msg
 view params = 
-    el [ width fill ] <| row [ width fill ] 
-        [ column [ mainContent, width <| fillPortion 5 ]
+    el [ width fill, height fill ] <| row [ width fill ] 
+        [ column [ mainContent, width <| fillPortion 5, padding 30 ]
             [ paragraph [] [ text <| "Country: " ++ params.country ]
             , paragraph [] 
                 [ total_ .confirmed (Dict.get params.country params.data)
-                    |> String.fromInt
+                    |> formatNumber
                     |> (++) "Confirmed: "
                     |> text
                 ]
             , paragraph [] 
                 [ total_ .deaths (Dict.get params.country params.data)
-                    |> String.fromInt
+                    |> formatNumber
                     |> (++) "Deaths: "
                     |> text
                 ]
             , paragraph []
                 [ total_ .recovered (Dict.get params.country params.data)
-                    |> String.fromInt
+                    |> formatNumber
                     |> (++) "Recovered: "
                     |> text
                 ]
             , el [ width <| maximum 900 fill ] <| html params.leftSide
             ]
-        , column [ navigation, width <| fillPortion 2, height fill ]
+        , column [ navigation, width <| fillPortion 2, height fill, padding 30 ]
             [ html <| Html.select [ Html.Events.onInput (\x -> Msg (Ok params.data) x) ]  
                 (Dict.keys params.data |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
             , paragraph [] [ text "Total Statisctics" ]
             , paragraph [] 
                 [ total .confirmed params.data 
-                    |> String.fromInt
+                    |> formatNumber
                     |> (++) "Confirmed: "
                     |> text
                 ]
             , paragraph []
                 [ total .deaths params.data
-                    |> String.fromInt
+                    |> formatNumber
                     |> (++) "Deaths: "
                     |> text
                 ]
             , paragraph []
                 [ total .recovered params.data
-                    |> String.fromInt
+                    |> formatNumber
                     |> (++) "Recovered: "
                     |> text
                 ]
             ] 
         ]
+
+formatNumber : Int -> String
+formatNumber n =
+    let 
+        breakString : List String -> String -> List String
+        breakString acc s =
+            case s of 
+                "" -> 
+                    acc
+                _  ->
+                    breakString ((String.right 3 s)::acc) <| String.dropRight 3 s
+    in
+    String.fromInt n
+        |> breakString []
+        |> String.join " "
 
 total : (DataEntry -> Int) -> CountriesData -> Int
 total f data = 
