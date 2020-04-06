@@ -11,7 +11,7 @@ import Time
 import Iso8601
 import TypedSvg exposing (g, svg)
 import TypedSvg.Attributes exposing (class, fill, stroke, transform, viewBox)
-import TypedSvg.Attributes.InPx exposing (strokeWidth)
+import TypedSvg.Attributes.InPx exposing (strokeWidth, width)
 import TypedSvg.Core exposing (Svg)
 import TypedSvg.Types exposing (Paint(..), Transform(..))
 
@@ -25,6 +25,7 @@ type alias ChartParams =
     , dateTo    : Date
     , valuesMin : Int
     , valuesMax : Int
+    , svgWidth  : Float
     }
 
 
@@ -77,7 +78,7 @@ drawLineChart params =
             List.map transformToAreaData data
                 |> Shape.area Shape.monotoneInXCurve
     in
-    svg [ viewBox 0 0 params.w params.h ]
+    svg [ viewBox 0 0 params.w params.h, width params.svgWidth ]
         [ g [ transform [ Translate (params.padding - 1) (params.h - params.padding) ] ]
             [ xAxis ]
         , g [ transform [ Translate (params.padding - 1) params.padding ] ]
