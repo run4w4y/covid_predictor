@@ -25,6 +25,7 @@ type alias DefaultParams =
 view : DefaultParams -> Element Msg
 view params = 
     el [ width fill, height fill ] <| row [ width fill, height fill ] 
+        -- Main content
         [ column 
             [ mainContent
             , width <| fillPortion 5
@@ -50,7 +51,14 @@ view params =
                 , el 
                     [ Font.color <| rgb255 70 70 70 ] <| text params.country 
                 ]
-            , paragraph [] 
+            , paragraph 
+                [ Font.family
+                    [ roboto
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 18
+                ] 
                 [ el 
                     [ Font.color <| rgb255 183 28 28 ] <| text "Confirmed: "
                 , total_ .confirmed (Dict.get params.country params.data)
@@ -58,7 +66,14 @@ view params =
                     |> text 
                     |> el [ Font.color <| rgb255 198 40 40 ]
                 ]
-            , paragraph []
+            , paragraph 
+                [ Font.family
+                    [ roboto
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 18
+                ] 
                 [ el
                     [ Font.color <| rgb255 13 71 161 ] <| text "Recovered: "
                 , total_ .recovered (Dict.get params.country params.data)
@@ -66,7 +81,14 @@ view params =
                     |> text
                     |> el [ Font.color <| rgb255 21 101 192 ]
                 ]
-            , paragraph [] 
+            , paragraph 
+                [ Font.family
+                    [ roboto
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 18
+                ]  
                 [ el
                     [ Font.color <| rgb255 38 50 56 ] <| text "Deaths: "
                 , total_ .deaths (Dict.get params.country params.data)
@@ -76,6 +98,8 @@ view params =
                 ]
             , el [ width <| maximum 900 fill ] <| html params.leftSide
             ]
+        
+        -- Right bar
         , column 
             [ navigation
             , width <| fillPortion 2
@@ -86,26 +110,65 @@ view params =
             [ html <| Html.select [ Html.Events.onInput (\x -> Msg (Ok params.data) x) ]  
                 (Dict.keys params.data 
                     |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
-            , paragraph [] [ text "Total Statisctics" ]
-            , paragraph [] 
-                [ total .confirmed params.data 
+            , el [ paddingEach { edges | bottom = 15, top = 15 } ] <| paragraph 
+                [ Font.color <| rgb255 30 30 30
+                , Font.regular
+                , Font.family
+                    [ openSans
+                    , Font.sansSerif
+                    ]
+                , Font.size 25
+                , Border.solid
+                , Border.widthEach { edges | bottom = 2 }
+                , Border.color <| rgb255 30 30 30
+                ] 
+                [ text "Total Statisctics" ]
+            , paragraph 
+                [ Font.family
+                    [ roboto
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 18
+                ] 
+                [ el 
+                    [ Font.color <| rgb255 183 28 28 ] <| text "Confirmed: "
+                , total .confirmed params.data
                     |> formatNumber
-                    |> (++) "Confirmed: "
-                    |> text
+                    |> text 
+                    |> el [ Font.color <| rgb255 198 40 40 ]
                 ]
-            , paragraph []
-                [ total .deaths params.data
+            , paragraph 
+                [ Font.family
+                    [ roboto
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 18
+                ] 
+                [ el
+                    [ Font.color <| rgb255 13 71 161 ] <| text "Recovered: "
+                , total .recovered params.data
                     |> formatNumber
-                    |> (++) "Deaths: "
                     |> text
+                    |> el [ Font.color <| rgb255 21 101 192 ]
                 ]
-            , paragraph []
-                [ total .recovered params.data
+            , paragraph 
+                [ Font.family
+                    [ roboto
+                    , Font.sansSerif
+                    ]
+                , Font.regular
+                , Font.size 18
+                ]  
+                [ el
+                    [ Font.color <| rgb255 38 50 56 ] <| text "Deaths: "
+                , total .deaths params.data
                     |> formatNumber
-                    |> (++) "Recovered: "
                     |> text
+                    |> el [ Font.color <| rgb255 66 66 66 ]
                 ]
-            ] 
+            ]
         ]
 
 edges = 
