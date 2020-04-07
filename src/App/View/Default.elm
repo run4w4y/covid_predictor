@@ -96,7 +96,7 @@ view params =
                     |> text
                     |> el [ Font.color <| rgb255 66 66 66 ]
                 ]
-            , el [ width <| maximum 900 fill ] <| html params.leftSide
+            , el [ width <| maximum 1000 fill ] <| html params.leftSide
             ]
         
         -- Right bar
