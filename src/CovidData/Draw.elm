@@ -10,6 +10,7 @@ import Date exposing (Date)
 import Time
 import Iso8601
 import Dict exposing (Dict)
+import Array
 import TypedSvg exposing (g, svg, text_)
 import TypedSvg.Attributes exposing (class, fill, stroke, transform, viewBox, fontSize)
 import TypedSvg.Attributes.InPx exposing (strokeWidth, width)
@@ -134,6 +135,37 @@ drawLineChart params =
             )
                 |> (flip List.map) dataRemoved
                 |> Shape.area Shape.monotoneInXCurve
+
+        getLast : List a -> Maybe a
+        getLast l =
+            let
+                arr = Array.fromList l
+            in
+            Array.get (Array.length arr - 1) arr 
+
+        deathsY : Float
+        deathsY = 
+            List.unzip params.dataDeaths
+                |> Tuple.second
+                |> getLast
+                |> Maybe.withDefault 0
+                |> Scale.convert yScale
+            
+        removedY : Float
+        removedY =
+            List.unzip dataRemoved
+                |> Tuple.second
+                |> getLast
+                |> Maybe.withDefault 0
+                |> Scale.convert yScale
+            
+        confirmedY : Float
+        confirmedY =
+            List.unzip params.dataConfirmed
+                |> Tuple.second
+                |> getLast
+                |> Maybe.withDefault 0
+                |> Scale.convert yScale
     in
     svg [ viewBox 0 0 params.w params.h ]
         [ g [ transform [ Translate (params.padding - 1) (params.h - params.padding) ] ] 
@@ -151,8 +183,37 @@ drawLineChart params =
                 , fontSize <| Px 12
                 ] 
                 [ text "People" ]
+            , text_
+                [ transform [ Translate (params.w - 2*params.padding + 2) (deathsY + 4) ] 
+                , fontSize <| Px 12
+                ]
+                [ text "- D" ]
+            , text_
+                [ transform [ Translate (params.w - 2*params.padding + 2) (removedY + 4) ] 
+                , fontSize <| Px 12
+                ]
+                [ text "- R" ]
+            , text_
+                [ transform [ Translate (params.w - 2*params.padding + 2) (confirmedY + 4) ] 
+                , fontSize <| Px 12
+                ]
+                [ text "- C" ]
+            , text_
+                [ transform [ Translate 10 10 ] 
+                , fontSize <| Px 12
+                ]
+                [ text "C - Confirmed" ]
+            , text_
+                [ transform [ Translate 10 25 ] 
+                , fontSize <| Px 12
+                ]
+                [ text "R - Removed (D + recovered)" ]
+            , text_
+                [ transform [ Translate 10 40 ] 
+                , fontSize <| Px 12
+                ]
+                [ text "D - Deaths" ]
             ]
-        , 
         -- Areas
         , g [ transform [ Translate params.padding params.padding ], class [ "series" ] ]
             [ Path.element (area params.dataDeaths)
