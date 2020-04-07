@@ -50,14 +50,16 @@ countrySvg data country =
                         |> Maybe.withDefault 10
             in
             Just <| drawLineChart 
-                { data      = List.map (\x -> (x.date, toFloat x.confirmed)) entries
-                , w         = 900
-                , h         = 450
-                , padding   = 50
-                , dateFrom  = minDate
-                , dateTo    = maxDate
-                , valuesMin = minValue
-                , valuesMax = maxValue
+                { dataConfirmed = List.map (\x -> (x.date, toFloat x.confirmed)) entries
+                , dataRecovered = List.map (\x -> (x.date, toFloat x.recovered)) entries
+                , dataDeaths    = List.map (\x -> (x.date, toFloat x.deaths)) entries
+                , w             = 900
+                , h             = 450
+                , padding       = 50
+                , dateFrom      = minDate
+                , dateTo        = maxDate
+                , valuesMin     = minValue
+                , valuesMax     = maxValue
                 } 
 
         Nothing ->

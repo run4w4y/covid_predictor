@@ -9,22 +9,25 @@ import Shape
 import Date exposing (Date)
 import Time
 import Iso8601
-import TypedSvg exposing (g, svg)
-import TypedSvg.Attributes exposing (class, fill, stroke, transform, viewBox)
+import Dict exposing (Dict)
+import TypedSvg exposing (g, svg, text_)
+import TypedSvg.Attributes exposing (class, fill, stroke, transform, viewBox, fontSize)
 import TypedSvg.Attributes.InPx exposing (strokeWidth, width)
-import TypedSvg.Core exposing (Svg)
-import TypedSvg.Types exposing (Paint(..), Transform(..))
+import TypedSvg.Core exposing (Svg, text)
+import TypedSvg.Types exposing (Paint(..), Transform(..), Length(..))
 
 
 type alias ChartParams =
-    { data      : List ( Date, Float )
-    , w         : Float
-    , h         : Float
-    , padding   : Float
-    , dateFrom  : Date
-    , dateTo    : Date
-    , valuesMin : Int
-    , valuesMax : Int
+    { dataConfirmed : List ( Date, Float )
+    , dataRecovered : List ( Date, Float )
+    , dataDeaths    : List ( Date, Float )
+    , w             : Float
+    , h             : Float
+    , padding       : Float
+    , dateFrom      : Date
+    , dateTo        : Date
+    , valuesMin     : Int
+    , valuesMax     : Int
     }
 
 
@@ -34,6 +37,10 @@ dateToPosix =
         >> Iso8601.toTime 
         >> Result.toMaybe 
         >> Maybe.withDefault (Time.millisToPosix 0) 
+
+flip : (a -> b -> c) -> (b -> a -> c)
+flip f =
+    \x y -> f y x
 
 drawLineChart : ChartParams -> Svg msg
 drawLineChart params =
@@ -76,15 +83,93 @@ drawLineChart params =
         area data =
             List.map transformToAreaData data
                 |> Shape.area Shape.monotoneInXCurve
+
+        dataRemoved =
+            List.map2 (\(d, x) (_, y) -> (d, x + y)) params.dataRecovered params.dataDeaths
+        
+        removedDict : Dict String Float
+        removedDict =
+            List.map (\(x, y) -> (Date.toIsoString x, y)) dataRemoved
+                |> Dict.fromList
+        
+        deathsDict : Dict String Float
+        deathsDict =
+            List.map (\(x, y) -> (Date.toIsoString x, y)) params.dataDeaths
+                |> Dict.fromList
+
+        areaConfirmed : Path
+        areaConfirmed =
+            (\(x, y) -> Just 
+                ( 
+                    ( Scale.convert xScale (dateToPosix x)
+                    , Date.toIsoString x 
+                        |> (flip Dict.get) removedDict 
+                        |> Maybe.withDefault 0 
+                        |> Scale.convert yScale 
+                    )
+                , 
+                    ( Scale.convert xScale (dateToPosix x)
+                    , Scale.convert yScale y 
+                    )
+                )
+            )
+                |> (flip List.map) params.dataConfirmed
+                |> Shape.area Shape.monotoneInXCurve
+        
+        areaRecovered : Path
+        areaRecovered =
+            (\(x, y) -> Just 
+                ( 
+                    ( Scale.convert xScale (dateToPosix x)
+                    , Date.toIsoString x 
+                        |> (flip Dict.get) deathsDict 
+                        |> Maybe.withDefault 0 
+                        |> Scale.convert yScale 
+                    )
+                , 
+                    ( Scale.convert xScale (dateToPosix x)
+                    , Scale.convert yScale y 
+                    )
+                )
+            )
+                |> (flip List.map) dataRemoved
+                |> Shape.area Shape.monotoneInXCurve
     in
     svg [ viewBox 0 0 params.w params.h ]
-        [ g [ transform [ Translate (params.padding - 1) (params.h - params.padding) ] ]
-            [ xAxis ]
+        [ g [ transform [ Translate (params.padding - 1) (params.h - params.padding) ] ] 
+            [ xAxis 
+            , text_ -- Text "Time"
+                [ transform [ Translate ( params.w / 2 - params.padding ) 40 ]
+                , fontSize <| Px 12
+                ] 
+                [ text "Time" ]
+            ]
         , g [ transform [ Translate (params.padding - 1) params.padding ] ]
-            [ yAxis ]
+            [ yAxis 
+            , text_ -- Text "People"
+                [ transform [ Translate -30 -15 ]
+                , fontSize <| Px 12
+                ] 
+                [ text "People" ]
+            ]
+        , 
+        -- Areas
         , g [ transform [ Translate params.padding params.padding ], class [ "series" ] ]
-            [ Path.element (area params.data) [ strokeWidth 3, fill <| Paint <| Color.rgba 1 0 0 0.54 ]
-            , Path.element (line params.data) [ stroke <| Paint <| Color.rgb 1 0 0, strokeWidth 3, fill PaintNone  ]
+            [ Path.element (area params.dataDeaths)
+                [ strokeWidth 3, fill <| Paint <| Color.rgba 0 0 0 0.54 ]
+            , Path.element areaConfirmed 
+                [ strokeWidth 3, fill <| Paint <| Color.rgba 1 0 0 0.54 ]
+            , Path.element areaRecovered
+                [ strokeWidth 3, fill <| Paint <| Color.rgba 0 0 1 0.54 ]
+            ]
+        -- Lines
+        , g [ transform [ Translate params.padding params.padding ], class [ "series" ] ]
+            [ Path.element (line params.dataDeaths)
+                [ stroke <| Paint <| Color.rgb 0 0 0, strokeWidth 3, fill PaintNone ]
+            , Path.element (line dataRemoved)
+                [ stroke <| Paint <| Color.rgb 0 0 1, strokeWidth 3, fill PaintNone ]
+            , Path.element (line params.dataConfirmed) 
+                [ stroke <| Paint <| Color.rgb 1 0 0, strokeWidth 3, fill PaintNone ]
             ]
         ]
  
