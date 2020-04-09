@@ -24,14 +24,15 @@ type alias DefaultParams =
 
 view : DefaultParams -> Element Msg
 view params = 
-    el [ width fill, height fill ] <| row [ width fill, height fill ] 
+    el [ width fill, height fill, scrollbars ] <| row [ width fill, height fill, scrollbars ] 
         -- Main content
         [ column 
             [ mainContent
             , width <| fillPortion 5
             , padding 30
-            , Bg.color <| rgb255 224 224 224 
+            , Bg.color <| rgb255 250 250 250 
             , height fill
+            , scrollbarY
             ]
             [ el [ paddingEach { edges | bottom = 15 } ] <| paragraph 
                 [ Font.family

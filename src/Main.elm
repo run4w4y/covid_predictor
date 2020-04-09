@@ -7,7 +7,7 @@ import App.View.Default
 import App.View.Loading
 import App.View.Error
 import Html exposing (Html)
-import Element exposing (layout)
+import Element exposing (..)
 import Browser
 import CovidData exposing (..)
 import CovidData.Decode exposing (..)
@@ -57,25 +57,29 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view model =
-    layout [] <| case model of
-        HttpFailure ->
-            App.View.Error.view 
-                "something went wrong with fetching data over http"
-        
-        Loading ->
-            App.View.Loading.view
+    layout 
+        [ height fill
+        , width fill
+        , scrollbars
+        ] <| case model of
+            HttpFailure ->
+                App.View.Error.view 
+                    "something went wrong with fetching data over http"
+            
+            Loading ->
+                App.View.Loading.view
 
-        CountryNotFound data country ->
-            App.View.Default.view 
-                { leftSide = Html.pre [] [ Html.text "couldnt find country" ]
-                , data = data
-                , country = country
-                }
+            CountryNotFound data country ->
+                App.View.Default.view 
+                    { leftSide = Html.pre [] [ Html.text "couldnt find country" ]
+                    , data = data
+                    , country = country
+                    }
 
-        Success data country svgChart ->
-            App.View.Default.view 
-                { leftSide = svgChart
-                , data = data
-                , country = country
-                }
+            Success data country svgChart ->
+                App.View.Default.view 
+                    { leftSide = svgChart
+                    , data = data
+                    , country = country
+                    }
 
