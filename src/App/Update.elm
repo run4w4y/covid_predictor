@@ -1,7 +1,8 @@
 module App.Update exposing (update)
 
 import CovidData exposing (CountriesData)
-import CovidData.Draw exposing (drawLineChart)
+import CovidData.Draw.LineChart exposing (drawLineChart)
+import CovidData.Draw.BarChart exposing (drawBarChart)
 import App.Model exposing (Model(..))
 import App.Msg exposing (Msg)
 import Html exposing (Html)
@@ -48,19 +49,26 @@ countrySvg data country =
                 maxValue =
                     Array.get (Array.length sortedValues - 1) sortedValues
                         |> Maybe.withDefault 10
+
+                params = 
+                    { dataConfirmed = List.map (\x -> (x.date, toFloat x.confirmed + 1)) entries
+                    , dataRecovered = List.map (\x -> (x.date, toFloat x.recovered + 1)) entries
+                    , dataDeaths    = List.map (\x -> (x.date, toFloat x.deaths + 1)) entries
+                    , w             = 900
+                    , h             = 450
+                    , padding       = 50
+                    , dateFrom      = minDate
+                    , dateTo        = maxDate
+                    , valuesMin     = minValue
+                    , valuesMax     = maxValue
+                    } 
+
             in
-            Just <| drawLineChart 
-                { dataConfirmed = List.map (\x -> (x.date, toFloat x.confirmed)) entries
-                , dataRecovered = List.map (\x -> (x.date, toFloat x.recovered)) entries
-                , dataDeaths    = List.map (\x -> (x.date, toFloat x.deaths)) entries
-                , w             = 900
-                , h             = 450
-                , padding       = 50
-                , dateFrom      = minDate
-                , dateTo        = maxDate
-                , valuesMin     = minValue
-                , valuesMax     = maxValue
-                } 
+            Just <| Html.div [] 
+                [ Html.div [] [ drawLineChart params ]
+                , Html.div [] [ drawBarChart params ]
+                ]
+                
 
         Nothing ->
             Nothing
