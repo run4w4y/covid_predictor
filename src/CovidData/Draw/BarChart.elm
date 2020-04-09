@@ -21,12 +21,19 @@ drawBarChart params =
         growth a b =
             if (a == 0) 
                 then 0
-                else b / a
+                else ((b / a) - 1) * 100 |> round |> toFloat
+
+        growthRates_ : List ( Date, Float ) -> List ( Date, Float )
+        growthRates_ l =
+            case l of 
+                ( _, x ) :: ( d, y ) :: xs -> 
+                    (d, growth x y) :: (growthRates_ xs)
+                _ ->
+                    []
 
         growthRates : List ( Date, Float )
-        growthRates =
-            List.foldr (\( d, x ) acc -> ( d, growth x <| Maybe.withDefault 0 <| Maybe.map Tuple.second <| List.head acc )::acc) 
-                [] params.dataConfirmed
+        growthRates = 
+            growthRates_ params.dataConfirmed 
 
         xScale : BandScale Date
         xScale =
