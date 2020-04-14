@@ -2,6 +2,7 @@ module App.View.Default exposing (DefaultParams, view)
 
 import App.Msg exposing (Msg)
 import CovidData exposing (..)
+import CovidData.Draw.Inner exposing (flip)
 import Element exposing (..)
 import Element.Region exposing (..)
 import Element.Background as Bg
@@ -63,7 +64,6 @@ view params =
                 [ el 
                     [ Font.color <| rgb255 183 28 28 ] <| text "Confirmed: "
                 , total_ .confirmed (Dict.get params.country params.data)
-                    |> formatNumber
                     |> text 
                     |> el [ Font.color <| rgb255 198 40 40 ]
                 ]
@@ -78,7 +78,6 @@ view params =
                 [ el
                     [ Font.color <| rgb255 13 71 161 ] <| text "Recovered: "
                 , total_ .recovered (Dict.get params.country params.data)
-                    |> formatNumber
                     |> text
                     |> el [ Font.color <| rgb255 21 101 192 ]
                 ]
@@ -93,11 +92,18 @@ view params =
                 [ el
                     [ Font.color <| rgb255 38 50 56 ] <| text "Deaths: "
                 , total_ .deaths (Dict.get params.country params.data)
-                    |> formatNumber
                     |> text
                     |> el [ Font.color <| rgb255 66 66 66 ]
                 ]
-            , el [ width <| maximum 1000 fill ] <| html params.leftSide
+            , el 
+                [ width <| maximum 1000 fill 
+                , Font.color <| rgb255 30 30 30
+                , Font.family
+                    [ openSans
+                    , Font.sansSerif
+                    ]
+                , Font.size 20
+                ] <| html params.leftSide
             ]
         
         -- Right bar
@@ -122,8 +128,9 @@ view params =
                 , Border.solid
                 , Border.widthEach { edges | bottom = 2 }
                 , Border.color <| rgb255 30 30 30
+                , padding 5
                 ] 
-                [ text "Total Statisctics" ]
+                [ text "Total Statistics" ]
             , paragraph 
                 [ Font.family
                     [ roboto
@@ -135,7 +142,6 @@ view params =
                 [ el 
                     [ Font.color <| rgb255 183 28 28 ] <| text "Confirmed: "
                 , total .confirmed params.data
-                    |> formatNumber
                     |> text 
                     |> el [ Font.color <| rgb255 198 40 40 ]
                 ]
@@ -150,7 +156,6 @@ view params =
                 [ el
                     [ Font.color <| rgb255 13 71 161 ] <| text "Recovered: "
                 , total .recovered params.data
-                    |> formatNumber
                     |> text
                     |> el [ Font.color <| rgb255 21 101 192 ]
                 ]
@@ -165,7 +170,6 @@ view params =
                 [ el
                     [ Font.color <| rgb255 38 50 56 ] <| text "Deaths: "
                 , total .deaths params.data
-                    |> formatNumber
                     |> text
                     |> el [ Font.color <| rgb255 66 66 66 ]
                 ]
@@ -196,24 +200,47 @@ formatNumber n =
 
 -- Total like total
 
-total : (DataEntry -> Int) -> CountriesData -> Int
+total : (DataEntry -> Int) -> CountriesData -> String
 total f data = 
-    Dict.values data
-        |> List.map (total_ f << Just)
-        |> List.sum 
+    let
+        getRight d l =
+            let
+                a = Array.fromList l
+            in
+            Array.get (Array.length a - d) a
+                |> Maybe.map f
+                |> Maybe.withDefault 0
+        t = 
+            Dict.values data
+                |> List.map (getRight 1)
+                |> List.sum 
+        g = 
+            Dict.values data
+                |> List.map (getRight 2)
+                |> List.sum
+                |> toFloat
+                |> (flip growth) (toFloat t)
+    in
+    (formatNumber t) ++ " (+" ++ (String.fromFloat g) ++ "%)" 
 
 -- Total for countries
 
-total_ : (DataEntry -> Int) -> Maybe (List DataEntry) -> Int
+total_ : (DataEntry -> Int) -> Maybe (List DataEntry) -> String
 total_ f entries =
-    case entries of
-        Just e -> 
-            let 
-                e_ = 
-                    List.map f e
-                        |> Array.fromList
-            in
-            Array.get (Array.length e_ - 1) e_ |>
-                Maybe.withDefault 0
-        Nothing -> 
-            0
+    let
+        e = 
+            case entries of 
+                Just list ->
+                    List.map f list |> Array.fromList
+                Nothing -> 
+                    [0, 0] |> Array.fromList
+        t =
+            Array.get (Array.length e - 1) e 
+                |> Maybe.withDefault 0
+        g = 
+            Array.get (Array.length e - 2) e 
+                |> Maybe.withDefault 0
+                |> toFloat
+                |> (flip growth) (toFloat t)
+    in
+    (formatNumber t) ++ " (+" ++ (String.fromFloat g) ++ "%)" 
