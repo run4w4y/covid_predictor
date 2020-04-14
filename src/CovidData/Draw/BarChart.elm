@@ -17,12 +17,6 @@ import TypedSvg.Types exposing (AnchorAlignment(..), Transform(..))
 drawBarChart : ChartParams -> Svg msg
 drawBarChart params = 
     let 
-        growth : Float -> Float -> Float
-        growth a b =
-            if (a == 0) 
-                then 0
-                else ((b / a) - 1) * 100 |> round |> toFloat
-
         growthRates_ : List ( Date, Float ) -> List ( Date, Float )
         growthRates_ l =
             case l of 
