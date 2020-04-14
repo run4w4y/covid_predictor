@@ -66,6 +66,7 @@ countrySvg data country =
             in
             Just <| Html.div [] 
                 [ Html.div [] [ drawLineChart params ]
+                , Html.p [] [ Html.text "Growth:" ]
                 , Html.div [] [ drawBarChart params ]
                 ]
                 
