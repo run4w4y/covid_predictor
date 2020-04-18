@@ -4,7 +4,7 @@ import CovidData exposing (CountriesData)
 import CovidData.Draw.LineChart exposing (drawLineChart)
 import CovidData.Draw.BarChart exposing (drawBarChart)
 import App.Model exposing (Model(..))
-import App.Msg exposing (Msg)
+import App.Msg exposing (Msg(..))
 import Html exposing (Html)
 import Dict
 import Date
@@ -14,15 +14,22 @@ import Time exposing (Month(..))
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case msg.data of 
-        Ok data -> 
-            case countrySvg data msg.country of
-                Just svg ->
-                    ( Success data msg.country svg, Cmd.none )
-                Nothing ->
-                    (CountryNotFound data msg.country, Cmd.none)
-        Err _ ->
-            (HttpFailure, Cmd.none)
+    case msg of 
+        ShowCountry m ->
+            case m.data of
+                Ok data -> 
+                    case countrySvg data m.country of
+                        Just svg ->
+                            ( DisplayCountry data m.country svg, Cmd.none )
+                        Nothing ->
+                            ( CountryNotFound data m.country, Cmd.none )
+                Err _ ->
+                    ( HttpFailure, Cmd.none )
+        ShowMap m ->
+            ( Map m.data m.country, Cmd.none )
+        ShowSimulation m ->
+            ( Simulation m.data m.country m.params, Cmd.none )
+
 
 countrySvg : CountriesData -> String -> Maybe (Html Msg)
 countrySvg data country =

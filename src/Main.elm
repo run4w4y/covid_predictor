@@ -2,11 +2,13 @@ module Main exposing (main)
 
 import App.Model exposing (Model(..))
 import App.Update exposing (update)
-import App.Msg exposing (Msg)
+import App.Msg exposing (Msg(..))
 import App.View.Default
 import App.View.Loading
 import App.View.Error
+import App.View.Country
 import Html exposing (Html)
+import Html.Attributes
 import Element exposing (..)
 import Browser
 import CovidData exposing (..)
@@ -42,7 +44,7 @@ loadData =
         { url = "https://pomber.github.io/covid19/timeseries.json"
         , expect = Http.expectJson identity dataDecoder
         }
-        |> C.map (\x -> Msg x "Afghanistan")
+        |> C.map (\x -> ShowCountry { data = x, country = "Afghanistan" })
 
 
 
@@ -71,14 +73,35 @@ view model =
 
             CountryNotFound data country ->
                 App.View.Default.view 
-                    { leftSide = Html.pre [] [ Html.text "couldnt find country" ]
+                    { leftSide = html <| Html.pre [] [ Html.text "couldnt find country" ]
                     , data = data
                     , country = country
                     }
 
-            Success data country svgChart ->
-                App.View.Default.view 
+            DisplayCountry data country svgChart ->
+                App.View.Country.view 
                     { leftSide = svgChart
+                    , data = data
+                    , country = country
+                    }
+            
+            Map data country -> 
+                App.View.Default.view 
+                    { leftSide = 
+                        Html.iframe 
+                            [ Html.Attributes.src "https://ourworldindata.org/grapher/total-cases-covid-19?tab=map"
+                            , Html.Attributes.style "height" "100%"
+                            ] 
+                            []
+                            |> html
+                            |> el [ width fill, height fill ] 
+                    , data = data
+                    , country = country
+                    }
+            
+            Simulation data country _ ->
+                App.View.Default.view 
+                    { leftSide = html <| Html.p [] []
                     , data = data
                     , country = country
                     }
