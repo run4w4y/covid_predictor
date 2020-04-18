@@ -47,23 +47,39 @@ view params =
             , padding 30 
             , Bg.color <| rgb255 242 242 242
             ]
-            [ row [ width fill ] -- Menu
-                [ column [ width <| fillPortion 1, height fill ] 
+            [ row [ width fill, paddingEach { edges | bottom = 10 } ] -- Menu
+                [ column 
+                    [ width <| fillPortion 1
+                    , height fill 
+                    , Border.solid
+                    , Border.widthEach { edges | right = 1 }
+                    , Border.color <| rgb255 30 30 30
+                    ] 
                     [ Input.button [ width fill, height fill ]
                         { onPress = Just <| ShowCountry { data = Ok params.data, country = params.country }
-                        , label = text "Stats"
+                        , label = el [ centerX, Font.size 18, padding 3 ] <| text "Statistics"
                         }
                     ]
-                , column [ width <| fillPortion 1, height fill ]
-                    [ Input.button [ width fill, height fill ]
+                , column 
+                    [ width <| fillPortion 1
+                    , height fill 
+                    , Border.solid
+                    , Border.widthEach { edges | right = 1 }
+                    , Border.color <| rgb255 30 30 30
+                    ]
+                    [ Input.button 
+                        [ width fill, height fill ]
                         { onPress = Just <| ShowMap { data = params.data, country = params.country }
-                        , label = text "Map"
+                        , label = el [ centerX, Font.size 18, padding 3 ] <| text "Map"
                         }
                     ]
-                , column [ width <| fillPortion 1, height fill ]
+                , column 
+                    [ width <| fillPortion 1
+                    , height fill 
+                    ]
                     [ Input.button [ width fill, height fill ]
                         { onPress = Nothing
-                        , label = text "Simulation"
+                        , label = el [ centerX, Font.size 18, padding 3 ] <| text "Simulation"
                         }
                     ]
                 ]
