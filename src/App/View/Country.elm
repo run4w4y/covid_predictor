@@ -18,28 +18,17 @@ import Array
 import App.View.Fonts exposing (..)
 
 type alias CountryParams = 
-    { data     : CountriesData
-    , country  : String
-    , leftSide : Html Msg
+    { data      : CountriesData
+    , country   : String
+    , leftSide  : Html Msg
+    , rightSide : Element Msg
     }
 
 
 view : CountryParams -> Element Msg
 view params = 
     column [ width fill ] 
-        [ el [ paddingEach { edges | bottom = 15 } ] <| paragraph 
-            [ Font.family
-                [ openSans
-                , Font.sansSerif
-                ]
-            , Font.regular
-            , Font.size 25
-            , Border.solid
-            , Border.widthEach { edges | bottom = 2 }
-            , Border.color <| rgb255 30 30 30
-            , width shrink
-            , padding 5
-            ] 
+        [ makeHeader
             [ el 
                 [ Font.color <| rgb255 30 30 30 ] <| text "Country: "
             , el 
@@ -101,6 +90,7 @@ view params =
             { data = params.data
             , country = params.country
             , leftSide = x
+            , rightSide = params.rightSide
             }
         |> App.View.Default.view 
 

@@ -9,6 +9,8 @@ import App.View.Error
 import App.View.Country
 import Html exposing (Html)
 import Html.Attributes
+import Html.Events
+import Dict
 import Element exposing (..)
 import Browser
 import CovidData exposing (..)
@@ -74,6 +76,7 @@ view model =
             CountryNotFound data country ->
                 App.View.Default.view 
                     { leftSide = html <| Html.pre [] [ Html.text "couldnt find country" ]
+                    , rightSide = countrySelect data
                     , data = data
                     , country = country
                     }
@@ -81,6 +84,7 @@ view model =
             DisplayCountry data country svgChart ->
                 App.View.Country.view 
                     { leftSide = svgChart
+                    , rightSide = countrySelect data
                     , data = data
                     , country = country
                     }
@@ -95,14 +99,23 @@ view model =
                             []
                             |> html
                             |> el [ width fill, height fill ] 
+                    , rightSide = none
                     , data = data
                     , country = country
                     }
             
             Simulation data country _ ->
                 App.View.Default.view 
-                    { leftSide = html <| Html.p [] []
+                    { leftSide = none
+                    , rightSide = none
                     , data = data
                     , country = country
                     }
 
+countrySelect : CountriesData -> Element Msg
+countrySelect data = 
+    [ App.View.Default.makeHeader [ text "Select country" ] |> el [ width shrink ]
+    , html <| Html.select [ Html.Events.onInput (\x -> ShowCountry { data = Ok data, country = x }) ]  
+        (Dict.keys data 
+            |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
+    ] |> paragraph []

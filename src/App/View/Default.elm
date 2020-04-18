@@ -1,4 +1,4 @@
-module App.View.Default exposing (DefaultParams, view, formatNumber, total, total_)
+module App.View.Default exposing (DefaultParams, view, formatNumber, total, total_, makeHeader)
 
 import App.Msg exposing (Msg(..))
 import CovidData exposing (..)
@@ -18,9 +18,10 @@ import App.View.Fonts exposing (..)
 
 
 type alias DefaultParams =
-    { leftSide : Element Msg
-    , data     : CountriesData
-    , country  : String
+    { leftSide  : Element Msg
+    , rightSide : Element Msg
+    , data      : CountriesData
+    , country   : String
     }
 
 
@@ -66,23 +67,7 @@ view params =
                         }
                     ]
                 ]
-            , html <| Html.select [ Html.Events.onInput (\x -> ShowCountry { data = (Ok params.data), country = x }) ]  
-                (Dict.keys params.data 
-                    |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
-            , el [ paddingEach { edges | bottom = 15, top = 15 } ] <| paragraph 
-                [ Font.color <| rgb255 30 30 30
-                , Font.regular
-                , Font.family
-                    [ openSans
-                    , Font.sansSerif
-                    ]
-                , Font.size 25
-                , Border.solid
-                , Border.widthEach { edges | bottom = 2 }
-                , Border.color <| rgb255 30 30 30
-                , padding 5
-                ] 
-                [ text "Total Statistics" ]
+            , makeHeader <| [ text "Total Statistics" ]
             , paragraph 
                 [ Font.family
                     [ roboto
@@ -125,6 +110,7 @@ view params =
                     |> text
                     |> el [ Font.color <| rgb255 66 66 66 ]
                 ]
+            , params.rightSide
             ]
         ]
 
@@ -200,3 +186,22 @@ total_ f entries =
                 |> (flip growth) (toFloat t)
     in
     (formatNumber t) ++ " (+" ++ (formatNumber (t - p)) ++ "/+" ++ (String.fromFloat g) ++ "%)" 
+
+
+makeHeader : List (Element Msg) -> Element Msg
+makeHeader e = 
+    el [ paddingEach { edges | bottom = 15, top = 15 } ] <| paragraph 
+        [ Font.color <| rgb255 30 30 30
+        , Font.regular
+        , Font.family
+            [ openSans
+            , Font.sansSerif
+            ]
+        , Font.size 25
+        , Border.solid
+        , Border.widthEach { edges | bottom = 2 }
+        , Border.color <| rgb255 30 30 30
+        , padding 5
+        , width shrink
+        ] 
+        e
