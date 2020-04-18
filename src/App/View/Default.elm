@@ -214,14 +214,16 @@ total f data =
             Dict.values data
                 |> List.map (getRight 1)
                 |> List.sum 
-        g = 
+        p = 
             Dict.values data
                 |> List.map (getRight 2)
                 |> List.sum
+        g = 
+            p
                 |> toFloat
                 |> (flip growth) (toFloat t)
     in
-    (formatNumber t) ++ " (+" ++ (String.fromFloat g) ++ "%)" 
+    (formatNumber t) ++ " (+" ++ (formatNumber (t - p)) ++ "/+" ++ (String.fromFloat g) ++ "%)" 
 
 -- Total for countries
 
@@ -237,10 +239,12 @@ total_ f entries =
         t =
             Array.get (Array.length e - 1) e 
                 |> Maybe.withDefault 0
-        g = 
+        p =
             Array.get (Array.length e - 2) e 
                 |> Maybe.withDefault 0
+        g = 
+            p
                 |> toFloat
                 |> (flip growth) (toFloat t)
     in
-    (formatNumber t) ++ " (+" ++ (String.fromFloat g) ++ "%)" 
+    (formatNumber t) ++ " (+" ++ (formatNumber (t - p)) ++ "/+" ++ (String.fromFloat g) ++ "%)" 
