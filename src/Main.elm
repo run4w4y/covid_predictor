@@ -46,7 +46,7 @@ loadData =
         { url = "https://pomber.github.io/covid19/timeseries.json"
         , expect = Http.expectJson identity dataDecoder
         }
-        |> C.map (\x -> ShowCountry { data = x, country = "Afghanistan" })
+        |> C.map (\x -> ShowCountry { data = x, country = "Russia" })
 
 
 
@@ -76,7 +76,7 @@ view model =
             CountryNotFound data country ->
                 App.View.Default.view 
                     { leftSide = html <| Html.pre [] [ Html.text "couldnt find country" ]
-                    , rightSide = countrySelect data
+                    , rightSide = countrySelect data country
                     , data = data
                     , country = country
                     }
@@ -84,7 +84,7 @@ view model =
             DisplayCountry data country svgChart ->
                 App.View.Country.view 
                     { leftSide = svgChart
-                    , rightSide = countrySelect data
+                    , rightSide = countrySelect data country
                     , data = data
                     , country = country
                     }
@@ -112,10 +112,12 @@ view model =
                     , country = country
                     }
 
-countrySelect : CountriesData -> Element Msg
-countrySelect data = 
+countrySelect : CountriesData -> String -> Element Msg
+countrySelect data country = 
     [ App.View.Default.makeHeader [ text "Select country" ] |> el [ width shrink ]
     , html <| Html.select [ Html.Events.onInput (\x -> ShowCountry { data = Ok data, country = x }) ]  
         (Dict.keys data 
-            |> List.map (\x -> Html.option [ Html.Attributes.value x ] [ Html.text x ]))
+            |> List.map (\x -> Html.option 
+                [ Html.Attributes.value x, Html.Attributes.selected <| x == country ] 
+                [ Html.text x ]))
     ] |> paragraph []
