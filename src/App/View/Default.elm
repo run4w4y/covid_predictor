@@ -91,6 +91,7 @@ view params =
                     ]
                 , Font.regular
                 , Font.size 18
+                , padding 5
                 ] 
                 [ el 
                     [ Font.color <| rgb255 183 28 28 ] <| text "Confirmed: "
@@ -105,6 +106,7 @@ view params =
                     ]
                 , Font.regular
                 , Font.size 18
+                , padding 5
                 ] 
                 [ el
                     [ Font.color <| rgb255 13 71 161 ] <| text "Recovered: "
@@ -119,6 +121,7 @@ view params =
                     ]
                 , Font.regular
                 , Font.size 18
+                , padding 5
                 ]  
                 [ el
                     [ Font.color <| rgb255 38 50 56 ] <| text "Deaths: "
